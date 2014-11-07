@@ -1,14 +1,9 @@
 
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import java.io.File;
-import java.io.IOException;
-
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.util.Version;
+
+import java.io.File;
 
 
 /*

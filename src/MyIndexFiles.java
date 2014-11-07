@@ -1,8 +1,8 @@
-package no.ntnu.idi.ir;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Date;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -12,28 +12,48 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
+import static org.apache.lucene.util.Version.LUCENE_4_10_1;
+
 public class MyIndexFiles {
 
 	public MyIndexFiles() {
 	}
 
-	static final File INDEX_DIR = new File("index");
+    //Folder to save the indexed files in
+	static File INDEX_DIR = new File("index");
 
 	/** Index all text files under a directory. */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws UnsupportedEncodingException {
 		String usage = "java org.apache.lucene.demo.IndexFiles <root_directory>";
+        String filePath = "";
 		if (args.length == 0) {
 			System.err.println("Usage: " + usage);
-			System.exit(1);
-		}
+
+            //Get the path do the files
+            String path = System.getProperty("user.dir") + "/docs";
+            System.out.println(path);
+            filePath = path;
+
+            //System.exit(1);
+
+		} else {
+            //Running the as CLI with parameters
+            // java -jar MyIndexFiles.jar "path/to/files"
+            filePath = args[0];
+        }
 
 		if (INDEX_DIR.exists()) {
-			System.out.println("Cannot save index to '" + INDEX_DIR
-					+ "' directory, please delete it first");
-			System.exit(1);
+
+			//System.out.println("Cannot save index to '" + INDEX_DIR
+			//		+ "' directory, please delete it first");
+
+            //If folder exsists, delete it
+            deleteFolder(INDEX_DIR);
+
+			//System.exit(1);
 		}
 
-		final File docDir = new File(args[0]);
+		final File docDir = new File(filePath);
 		if (!docDir.exists() || !docDir.canRead()) {
 			System.out
 					.println("Document directory '"
@@ -44,8 +64,9 @@ public class MyIndexFiles {
 
 		Date start = new Date();
 		try {
-			Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_4_10_1);
-		    IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_4_10_1, analyzer);
+			Analyzer analyzer;
+            analyzer = new StandardAnalyzer(LUCENE_4_10_1);
+            IndexWriterConfig iwc = new IndexWriterConfig(LUCENE_4_10_1, analyzer);
 		    IndexWriter writer = new IndexWriter(FSDirectory.open(INDEX_DIR), iwc); 
 	
 			System.out.println("Indexing to directory '" + INDEX_DIR + "'...");
@@ -87,5 +108,19 @@ public class MyIndexFiles {
 			}
 		}
 	}
+
+    public static void deleteFolder(File folder) {
+        File[] files = folder.listFiles();
+        if(files!=null) { //some JVMs return null for empty dirs
+            for(File f: files) {
+                if(f.isDirectory()) {
+                    deleteFolder(f);
+                } else {
+                    f.delete();
+                }
+            }
+        }
+        folder.delete();
+    }
 
 }
